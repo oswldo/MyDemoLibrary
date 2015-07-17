@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>My Library</title>
+    <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div>
+        <h2>Book Library</h2>
+        <table class="CSSTableGenerator">
+            <thead>
+                <tr><th>Name</th><th>Author</th><th>Category</th></tr>
+            </thead>
+            <tbody id="library"></tbody>
+        </table>
+    </div>
+    <div>
+        <h2>Search by</h2>
+        <input type="radio" name="search" value="Category" id="category" checked="checked" /> Category
+        <input type="radio" name="search" value="Author" id="author" /> Author<br />
+        <input type="text" id="bookId" size="30" />
+
+        <input type="button" value="Search" onclick="find();" />
+        <p id="book" />
+
+    </div>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+    var uri = 'api/books';
+
+    $(document).ready(function () {
+        getAll();
+    });
+
+    function getAll() {
+        $.getJSON(uri + '/getallbooks').done(function (data) {
+            $.each(data, function (key, item) {
+                var row = '<td>' + item.Name + '</td><td>' + item.Author + '</td><td>' + item.Category + '</td>';
+                console.log(row);
+                $('<tr/>', { html: row }).appendTo($('#library'));
+            });
+        });
+    }
+
+    function clear() {
+        $('#book').text('');
+        $('#library').empty();
+    }
+
+    function find() {
+        clear();
+
+        var id = $('#bookId').val();
+
+        if (id == '') {
+            getAll();
+        }
+        else {
+            var action = '';
+            if ($('#category').prop("checked") == true)
+                action = 'GetBookByCategory';
+            else
+                action = 'GetBookByAuthor';
+
+            console.log($('#category'));
+
+            $.getJSON(uri + '/' + action + '/' + id)
+                .done(function (data) {
+                    $.each(data, function (key, item) {
+                        var row2 = '<td>' + item.Name + '</td><td>' + item.Author + '</td><td>' + item.Category + '</td>';
+                        console.log(row2);
+                        $('<tr/>', { html: row2 }).appendTo($('#library'));
+                    });
+                })
+                .fail(function (jqXHR, textStatus, err) {
+                    $('#book').text('Error: ' + err);
+                });
+        }
+    }
+    </script>
+</body>
+</html>
